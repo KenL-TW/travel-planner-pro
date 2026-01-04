@@ -19,91 +19,23 @@ st.divider()
 
 
 # -----------------------
-# Sidebar: Trip Selection / Create / Import
+# Sidebar: Filters
 # -----------------------
+# 自動建立或使用默認旅程
+trips = svc.list_trips()
+if not trips:
+    # 建立默認韓國釜山行
+    trip_id = svc.create_trip({
+        "tripTitle": "韓國釜山行",
+        "destination": "釜山",
+        "startDate": "",
+        "endDate": "",
+        "currency": "KRW",
+    })
+else:
+    trip_id = trips[0]["trip_id"]
+
 with st.sidebar:
-    st.markdown("### 旅程管理")
-    trips = svc.list_trips()
-    if not trips:
-        tid = svc.create_trip()
-        trips = svc.list_trips()
-        st.success("已自動建立第一個旅程。")
-        st.session_state.selected_trip_id = tid
-
-    # 建立選項列表（保持順序）
-    trip_labels = [f"{t['trip_title']}  ({t['destination']})" for t in trips]
-    trip_ids = [t["trip_id"] for t in trips]
-    
-    # 決定預設選中的索引
-    default_index = 0
-    if "selected_trip_id" in st.session_state and st.session_state.selected_trip_id in trip_ids:
-        default_index = trip_ids.index(st.session_state.selected_trip_id)
-    
-    selected_label = st.selectbox("選擇旅程", options=trip_labels, index=default_index, key="trip_selector")
-    trip_id = trip_ids[trip_labels.index(selected_label)]
-    
-    # 同步更新 session_state
-    st.session_state.selected_trip_id = trip_id
-
-    st.write("")
-
-    with st.expander("建立新旅程", expanded=False):
-        st.caption("快速開始：只需填寫目的地，其他可稍後編輯")
-        
-        # 快速模板選擇
-        quick_template = st.selectbox(
-            "快速模板（可選）",
-            options=["自訂", "日本旅遊", "歐洲旅遊", "東南亞", "國內旅遊"],
-            index=0
-        )
-        
-        # 根據模板設定預設值
-        template_defaults = {
-            "日本旅遊": {"title": "日本之旅", "dest": "東京", "currency": "JPY"},
-            "歐洲旅遊": {"title": "歐洲之旅", "dest": "巴黎", "currency": "EUR"},
-            "東南亞": {"title": "東南亞之旅", "dest": "曼谷", "currency": "THB"},
-            "國內旅遊": {"title": "台灣旅遊", "dest": "台北", "currency": "TWD"},
-            "自訂": {"title": "新旅程", "dest": "", "currency": "TWD"}
-        }
-        
-        defaults = template_defaults.get(quick_template, template_defaults["自訂"])
-        
-        # 簡化輸入欄位
-        col1, col2 = st.columns(2)
-        with col1:
-            nt_title = st.text_input("旅程名稱 *", value=defaults["title"], placeholder="例：2026 春季日本行")
-            nt_currency = st.selectbox("幣別 *", options=["TWD", "JPY", "USD", "EUR", "KRW", "CNY", "THB", "SGD"], 
-                                      index=["TWD", "JPY", "USD", "EUR", "KRW", "CNY", "THB", "SGD"].index(defaults["currency"]))
-        with col2:
-            nt_dest = st.text_input("目的地 *", value=defaults["dest"], placeholder="例：東京、大阪")
-        
-        # 使用日期選擇器
-        with st.expander("設定日期（可選，稍後可編輯）"):
-            from datetime import date, timedelta
-            date_col1, date_col2 = st.columns(2)
-            with date_col1:
-                nt_start_date = st.date_input("開始日", value=None, format="YYYY-MM-DD")
-            with date_col2:
-                nt_end_date = st.date_input("結束日", value=None, format="YYYY-MM-DD")
-        
-        st.write("")
-        if st.button("立即建立", use_container_width=True, type="primary"):
-            if not nt_dest.strip():
-                st.error("請至少填寫目的地！")
-            else:
-                new_id = svc.create_trip({
-                    "tripTitle": nt_title,
-                    "destination": nt_dest,
-                    "startDate": str(nt_start_date) if nt_start_date else "",
-                    "endDate": str(nt_end_date) if nt_end_date else "",
-                    "currency": nt_currency,
-                })
-                st.session_state.selected_trip_id = new_id
-                st.success("建立完成！")
-                st.rerun()
-
-    st.write("")
-    st.markdown("---")
     st.markdown("### 智慧篩選")
     st.caption("快速找到特定事件或任務")
 

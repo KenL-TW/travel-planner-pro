@@ -683,23 +683,20 @@ with tab_admin:
             )
     
     with export_col2:
-        st.markdown("#### 下載資料庫檔案")
-        try:
-            import os
-            if os.path.exists(svc.db.DB_PATH):
-                with open(svc.db.DB_PATH, "rb") as f:
-                    db_bytes = f.read()
-                st.download_button(
-                    "下載 SQLite 資料庫",
-                    data=db_bytes,
-                    file_name=f"travel_planner_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.db",
-                    mime="application/x-sqlite3",
-                    use_container_width=True
-                )
-            else:
-                st.info("資料庫檔案尚未建立")
-        except Exception as e:
-            st.error(f"讀取資料庫失敗: {e}")
+        st.markdown("#### 下載資料檔案")
+        import os
+        if os.path.exists(json_storage.DATA_FILE):
+            with open(json_storage.DATA_FILE, "rb") as f:
+                json_bytes = f.read()
+            st.download_button(
+                "⬇️ 下載 JSON 資料檔",
+                data=json_bytes,
+                file_name=f"travel_data_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.json",
+                mime="application/json",
+                use_container_width=True
+            )
+        else:
+            st.info("資料檔案尚未建立")
     
     st.divider()
     

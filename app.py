@@ -183,28 +183,73 @@ with tab_plan:
 
     with left:
         st.subheader("旅程資訊")
-        c1, c2, c3, c4, c5 = st.columns([1.6, 1.4, 1.0, 1.0, 0.8], gap="small")
+        
+        # 使用 session_state 來管理即時更新
+        if "editing_trip" not in st.session_state:
+            st.session_state.editing_trip = False
+        
+        c1, c2 = st.columns([1.5, 1.5], gap="small")
         with c1:
-            new_title = st.text_input("旅程名稱", value=trip["trip_title"])
+            new_title = st.text_input("🏷️ 旅程名稱", value=trip["trip_title"], key="trip_title_input")
         with c2:
-            new_dest = st.text_input("目的地", value=trip["destination"])
+            new_dest = st.text_input("📍 目的地", value=trip["destination"], key="trip_dest_input")
+        
+        c3, c4, c5 = st.columns([1.2, 1.2, 1.0], gap="small")
         with c3:
-            new_start = st.text_input("開始日", value=trip.get("start_date") or "")
+            # 開始日期選擇器
+            from datetime import datetime
+            current_start = None
+            if trip.get("start_date"):
+                try:
+                    current_start = datetime.strptime(trip["start_date"], "%Y-%m-%d").date()
+                except:
+                    pass
+            new_start_date = st.date_input("📅 開始日", value=current_start, format="YYYY-MM-DD", key="trip_start_input")
+        
         with c4:
-            new_end = st.text_input("結束日", value=trip.get("end_date") or "")
+            # 結束日期選擇器（最小日期為開始日）
+            current_end = None
+            if trip.get("end_date"):
+                try:
+                    current_end = datetime.strptime(trip["end_date"], "%Y-%m-%d").date()
+                except:
+                    pass
+            min_end_date = new_start_date if new_start_date else None
+            new_end_date = st.date_input("📅 結束日", value=current_end, min_value=min_end_date, format="YYYY-MM-DD", key="trip_end_input")
+        
         with c5:
-            new_curr = st.text_input("幣別", value=trip["currency"], max_chars=6)
-
-        if st.button("保存旅程資訊", use_container_width=True):
-            svc.update_trip(trip_id, {
-                "trip_title": new_title,
-                "destination": new_dest,
-                "start_date": new_start,
-                "end_date": new_end,
-                "currency": new_curr
-            })
-            st.success("已保存。")
-            st.rerun()
+            # 幣別下拉選單
+            currency_options = ["TWD", "JPY", "USD", "EUR", "KRW", "CNY", "THB", "SGD", "GBP", "AUD"]
+            current_curr_idx = currency_options.index(trip["currency"]) if trip["currency"] in currency_options else 0
+            new_curr = st.selectbox("💱 幣別", options=currency_options, index=current_curr_idx, key="trip_curr_input")
+        
+        # 檢測是否有變更
+        has_changes = (
+            new_title != trip["trip_title"] or
+            new_dest != trip["destination"] or
+            str(new_start_date) != (trip.get("start_date") or "") or
+            str(new_end_date) != (trip.get("end_date") or "") or
+            new_curr != trip["currency"]
+        )
+        
+        # 即時保存按鈕
+        col_save, col_info = st.columns([1, 3])
+        with col_save:
+            if st.button("💾 保存", use_container_width=True, type="primary" if has_changes else "secondary", disabled=not has_changes):
+                svc.update_trip(trip_id, {
+                    "trip_title": new_title,
+                    "destination": new_dest,
+                    "start_date": str(new_start_date) if new_start_date else "",
+                    "end_date": str(new_end_date) if new_end_date else "",
+                    "currency": new_curr
+                })
+                st.success("✅ 已保存")
+                st.rerun()
+        with col_info:
+            if has_changes:
+                st.info("💡 有未保存的變更")
+            else:
+                st.caption("✓ 資料已同步")
 
         st.write("")
         st.subheader("行程時間線")

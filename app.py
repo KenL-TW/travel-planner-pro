@@ -318,7 +318,7 @@ with tab_plan:
                             st.rerun()
                     with save_col2:
                         if st.button("🗑️ 刪除", key=f"del_ev_{e['event_id']}", use_container_width=True):
-                            svc.delete_event(trip_id, e["event_id"])
+                            svc.delete_event(e["event_id"])
                             st.rerun()
 
                     st.write("")

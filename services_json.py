@@ -214,6 +214,21 @@ def delete_member(member_id: str):
     storage.delete_member(member_id)
 
 
+def list_all_members(active_only: bool = True):
+    """列出所有成員（兼容接口）"""
+    return storage.get_members()
+
+
+def add_member_to_trip(trip_id: str, member_id: str):
+    """將成員添加到旅程（JSON 模式下無需操作，成員已全局）"""
+    pass
+
+
+def remove_member_from_trip(trip_id: str, member_id: str):
+    """從旅程移除成員（實際刪除成員）"""
+    storage.delete_member(member_id)
+
+
 # -----------------------
 # Tasks
 # -----------------------

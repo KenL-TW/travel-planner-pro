@@ -281,18 +281,43 @@ def remove_member_from_trip(trip_id: str, member_id: str):
 # -----------------------
 # Tasks
 # -----------------------
-def add_task(trip_id: str, data: dict) -> str:
+def add_task(trip_id: str, event_id_or_data: str = None, content: str = None, assignee_id: str = None) -> str:
+    """
+    新增任務，支持兩種調用方式：
+    1. add_task(trip_id, data_dict) - 傳入字典
+    2. add_task(trip_id, event_id, content, assignee_id) - 傳入個別參數
+    """
     task_id = uid("task")
-    storage.add_task({
-        "task_id": task_id,
-        "event_id": data.get("eventId"),
-        "day_id": data.get("dayId"),
-        "content": data.get("content", ""),
-        "assignee_id": data.get("assigneeId"),
-        "status": data.get("status", "todo"),
-        "completed": data.get("completed", False),
-        "created_at": now_iso()
-    })
+    
+    # 判斷是傳入字典還是個別參數
+    if isinstance(event_id_or_data, dict):
+        data = event_id_or_data
+        storage.add_task({
+            "task_id": task_id,
+            "event_id": data.get("eventId"),
+            "day_id": data.get("dayId"),
+            "content": data.get("content", ""),
+            "assignee_id": data.get("assigneeId"),
+            "status": data.get("status", "todo"),
+            "completed": data.get("completed", False),
+            "created_at": now_iso()
+        })
+    else:
+        # 個別參數模式
+        event_id = event_id_or_data
+        # 自動設定狀態
+        status = "todo" if not assignee_id else "doing"
+        storage.add_task({
+            "task_id": task_id,
+            "event_id": event_id,
+            "day_id": None,
+            "content": content or "",
+            "assignee_id": assignee_id,
+            "status": status,
+            "completed": False,
+            "created_at": now_iso()
+        })
+    
     return task_id
 
 

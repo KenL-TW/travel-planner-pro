@@ -323,10 +323,15 @@ def add_task(trip_id: str, event_id_or_data: str = None, content: str = None, as
 
 def update_task(task_id: str, data: dict):
     updates = {}
+    # 支持多種欄位名稱
     if "content" in data:
         updates["content"] = data["content"]
+    if "text" in data:
+        updates["content"] = data["text"]
     if "assigneeId" in data:
         updates["assignee_id"] = data["assigneeId"]
+    if "assignee_id" in data:
+        updates["assignee_id"] = data["assignee_id"]
     if "status" in data:
         updates["status"] = data["status"]
     if "completed" in data:

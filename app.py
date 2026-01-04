@@ -341,7 +341,7 @@ with tab_plan:
 
                     if tasks:
                         for t in tasks:
-                            tc1, tc2, tc3 = st.columns([3.0, 1.6, 0.6], gap="small")
+                            tc1, tc2, tc3, tc4 = st.columns([2.5, 1.2, 0.8, 0.6], gap="small")
                             with tc1:
                                 ttext = st.text_input("任務內容", value=t.get("text",""), key=f"ttext_{t['task_id']}", label_visibility="collapsed")
                             with tc2:
@@ -353,18 +353,28 @@ with tab_plan:
                                             cur_name = label
                                 assignee_label = st.selectbox("指派給", options=member_choices, index=member_choices.index(cur_name), key=f"tasg_{t['task_id']}", label_visibility="collapsed")
                             with tc3:
+                                # 狀態選擇
+                                status_options = ["todo", "doing", "done"]
+                                status_labels = {"todo": "📋 待辦", "doing": "⚙️ 進行中", "done": "✅ 完成"}
+                                current_status = t.get("status", "todo")
+                                status_idx = status_options.index(current_status) if current_status in status_options else 0
+                                task_status_select = st.selectbox("狀態", options=status_options, 
+                                                                 format_func=lambda x: status_labels.get(x, x),
+                                                                 index=status_idx, 
+                                                                 key=f"tstatus_{t['task_id']}", 
+                                                                 label_visibility="collapsed")
+                            with tc4:
                                 if st.button("🗑️", key=f"tdel_{t['task_id']}", help="刪除", use_container_width=True):
                                     svc.delete_task(t["task_id"])
                                     st.rerun()
 
-                            # 自動保存按鈕（當內容或指派改變時）
+                            # 自動保存按鈕
                             if st.button("保存", key=f"tsave_{t['task_id']}", use_container_width=True):
-                                # 根據任務狀態自動判斷：如果有指派人則為 doing，否則為 todo
-                                task_status = "doing" if member_choice_to_id.get(assignee_label) else "todo"
                                 svc.update_task(t["task_id"], {
                                     "text": ttext,
-                                    "status": task_status,
+                                    "status": task_status_select,
                                     "assignee_id": member_choice_to_id.get(assignee_label),
+                                    "completed": task_status_select == "done"
                                 })
                                 st.rerun()
                     else:
@@ -666,18 +676,16 @@ with tab_admin:
     export_col1, export_col2 = st.columns(2)
     
     with export_col1:
-        st.markdown("#### 匯出所有旅程資料")
-        if st.button("匯出所有旅程（JSON）", use_container_width=True):
-            all_trips_data = []
-            for t in trips:
-                trip_data = svc.export_trip_json(t["trip_id"])
-                all_trips_data.append(trip_data)
-            
-            export_json = json.dumps(all_trips_data, ensure_ascii=False, indent=2)
+        st.markdown("#### 匯出完整旅程資料")
+        st.caption("包含所有天數、事件、任務、成員、清單資料")
+        if st.button("匯出完整資料（JSON）", use_container_width=True):
+            # 直接匯出完整的 JSON 數據結構
+            complete_data = svc.export_trip_json(trip_id)
+            export_json = json.dumps(complete_data, ensure_ascii=False, indent=2)
             st.download_button(
-                "⬇️ 下載 JSON 檔案",
+                "⬇️ 下載完整 JSON 檔案",
                 data=export_json.encode("utf-8"),
-                file_name=f"all_trips_backup_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.json",
+                file_name=f"travel_complete_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.json",
                 mime="application/json",
                 use_container_width=True
             )

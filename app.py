@@ -700,6 +700,42 @@ with tab_admin:
     
     st.divider()
     
+    # 導入資料
+    st.markdown("### 導入資料")
+    st.caption("上傳之前匯出的 JSON 檔案來恢復資料")
+    
+    uploaded_file = st.file_uploader("選擇 JSON 檔案", type=['json'], key="import_json")
+    
+    if uploaded_file is not None:
+        try:
+            # 讀取上傳的檔案
+            json_content = uploaded_file.read().decode('utf-8')
+            
+            # 顯示預覽
+            with st.expander("📄 預覽上傳的資料"):
+                preview_data = json.loads(json_content)
+                st.json(preview_data)
+            
+            st.warning("⚠️ 導入資料會覆蓋現有的所有資料，此操作無法復原！")
+            
+            col_import1, col_import2 = st.columns(2)
+            with col_import1:
+                if st.button("✅ 確認導入", type="primary", use_container_width=True):
+                    success = svc.import_trip_data(json_content)
+                    if success:
+                        st.success("✅ 資料導入成功！")
+                        st.balloons()
+                        st.rerun()
+                    else:
+                        st.error("❌ 資料格式錯誤，導入失敗")
+            with col_import2:
+                if st.button("❌ 取消", use_container_width=True):
+                    st.rerun()
+        except Exception as e:
+            st.error(f"讀取檔案時發生錯誤: {str(e)}")
+    
+    st.divider()
+    
     # 查看所有資料
     st.markdown("### 查看所有資料")
     

@@ -28,10 +28,23 @@ with st.sidebar:
         tid = svc.create_trip()
         trips = svc.list_trips()
         st.success("已自動建立第一個旅程。")
+        st.session_state.selected_trip_id = tid
 
     trip_options = {f"{t['trip_title']}  ({t['destination']})": t["trip_id"] for t in trips}
-    selected_label = st.selectbox("選擇旅程", options=list(trip_options.keys()))
+    
+    # 如果 session_state 中有指定的 trip_id，找到對應的 label
+    default_index = 0
+    if "selected_trip_id" in st.session_state:
+        for idx, (label, tid) in enumerate(trip_options.items()):
+            if tid == st.session_state.selected_trip_id:
+                default_index = idx
+                break
+    
+    selected_label = st.selectbox("選擇旅程", options=list(trip_options.keys()), index=default_index)
     trip_id = trip_options[selected_label]
+    
+    # 更新 session_state
+    st.session_state.selected_trip_id = trip_id
 
     st.write("")
 
@@ -86,6 +99,7 @@ with st.sidebar:
                     "endDate": str(nt_end_date) if nt_end_date else "",
                     "currency": nt_currency,
                 })
+                st.session_state.selected_trip_id = new_id
                 st.success("建立完成！")
                 st.rerun()
 

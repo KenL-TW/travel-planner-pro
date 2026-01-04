@@ -172,7 +172,7 @@ st.divider()
 # -----------------------
 # Tabs
 # -----------------------
-tab_plan, tab_tasks, tab_team, tab_check = st.tabs(["🗓️ 行程規劃", "📌 任務看板", "👥 旅遊團隊", "✅ 準備清單"])
+tab_plan, tab_tasks, tab_team, tab_check, tab_admin = st.tabs(["🗓️ 行程規劃", "📌 任務看板", "👥 旅遊團隊", "✅ 準備清單", "⚙️ 資料管理"])
 
 
 # -----------------------
@@ -629,3 +629,137 @@ with tab_check:
                 st.rerun()
 
         st.divider()
+
+
+# -----------------------
+# Tab: 資料管理
+# -----------------------
+with tab_admin:
+    st.subheader("⚙️ 資料庫管理")
+    
+    # 資料庫統計
+    st.markdown("### 📊 資料庫統計")
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        trip_count = len(trips)
+        st.metric("旅程總數", trip_count)
+    
+    with col2:
+        total_days = sum([len(svc.get_trip(t["trip_id"])["days"]) for t in trips])
+        st.metric("總天數", total_days)
+    
+    with col3:
+        all_members = svc.list_all_members(active_only=True)
+        st.metric("團隊成員", len(all_members))
+    
+    with col4:
+        total_events = len(all_events)
+        st.metric("事件總數", total_events)
+    
+    st.divider()
+    
+    # 資料庫位置
+    st.markdown("### 📁 資料庫資訊")
+    st.info(f"**資料庫路徑**: `{svc.db.DB_PATH}`")
+    st.warning("⚠️ **重要提醒**: Streamlit Cloud 使用臨時檔案系統，應用重啟後資料會清空。請定期匯出備份！")
+    
+    st.divider()
+    
+    # 匯出功能
+    st.markdown("### 💾 資料匯出與備份")
+    
+    export_col1, export_col2 = st.columns(2)
+    
+    with export_col1:
+        st.markdown("#### 匯出所有旅程資料")
+        if st.button("📤 匯出所有旅程（JSON）", use_container_width=True):
+            all_trips_data = []
+            for t in trips:
+                trip_data = svc.export_trip_json(t["trip_id"])
+                all_trips_data.append(trip_data)
+            
+            export_json = json.dumps(all_trips_data, ensure_ascii=False, indent=2)
+            st.download_button(
+                "⬇️ 下載 JSON 檔案",
+                data=export_json.encode("utf-8"),
+                file_name=f"all_trips_backup_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.json",
+                mime="application/json",
+                use_container_width=True
+            )
+    
+    with export_col2:
+        st.markdown("#### 下載資料庫檔案")
+        try:
+            import os
+            if os.path.exists(svc.db.DB_PATH):
+                with open(svc.db.DB_PATH, "rb") as f:
+                    db_bytes = f.read()
+                st.download_button(
+                    "⬇️ 下載 SQLite 資料庫",
+                    data=db_bytes,
+                    file_name=f"travel_planner_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.db",
+                    mime="application/x-sqlite3",
+                    use_container_width=True
+                )
+            else:
+                st.info("資料庫檔案尚未建立")
+        except Exception as e:
+            st.error(f"讀取資料庫失敗: {e}")
+    
+    st.divider()
+    
+    # 查看所有資料
+    st.markdown("### 🔍 查看所有資料")
+    
+    if trips:
+        for t in trips:
+            with st.expander(f"📋 {t['trip_title']} ({t['destination']})"):
+                trip_detail = svc.get_trip(t["trip_id"])
+                
+                # 基本資訊
+                st.markdown("**基本資訊**")
+                info_col1, info_col2, info_col3 = st.columns(3)
+                with info_col1:
+                    st.write(f"**旅程 ID**: {t['trip_id']}")
+                    st.write(f"**目的地**: {t['destination']}")
+                with info_col2:
+                    st.write(f"**日期**: {t.get('start_date', 'N/A')} ~ {t.get('end_date', 'N/A')}")
+                    st.write(f"**幣別**: {t['currency']}")
+                with info_col3:
+                    st.write(f"**天數**: {len(trip_detail['days'])}")
+                    st.write(f"**建立時間**: {t.get('created_at', 'N/A')}")
+                
+                # 事件統計
+                st.markdown("**事件統計**")
+                event_count = sum([len(d.get("events", [])) for d in trip_detail["days"]])
+                task_count = sum([len(e.get("tasks", [])) for e in [ev for d in trip_detail["days"] for ev in d.get("events", [])]])
+                
+                stat_col1, stat_col2, stat_col3 = st.columns(3)
+                with stat_col1:
+                    st.metric("事件數", event_count)
+                with stat_col2:
+                    st.metric("任務數", task_count)
+                with stat_col3:
+                    st.metric("成員數", len(trip_detail["members"]))
+    else:
+        st.info("目前沒有任何旅程資料")
+    
+    st.divider()
+    
+    # 危險操作區
+    st.markdown("### ⚠️ 危險操作")
+    with st.expander("🗑️ 刪除所有資料（無法復原）", expanded=False):
+        st.error("**警告**: 此操作將刪除所有旅程、事件、任務和清單資料，無法復原！")
+        confirm_delete_all = st.text_input("請輸入 DELETE ALL 以確認", key="confirm_delete_all")
+        if st.button("確認刪除所有資料", type="secondary"):
+            if confirm_delete_all == "DELETE ALL":
+                try:
+                    for t in trips:
+                        svc.delete_trip(t["trip_id"])
+                    st.success("✅ 所有資料已刪除")
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"刪除失敗: {e}")
+            else:
+                st.error("請正確輸入 DELETE ALL")

@@ -281,6 +281,11 @@ def delete_checklist_item(item_id: str):
 # -----------------------
 # Export / Import
 # -----------------------
+def export_trip_json(trip_id: str):
+    """匯出旅程數據（返回完整數據結構）"""
+    return storage.get_data()
+
+
 def export_all_trips():
     """匯出所有數據"""
     return storage.export_to_json()
@@ -289,3 +294,12 @@ def export_all_trips():
 def import_trip_data(json_str: str) -> bool:
     """導入數據"""
     return storage.import_from_json(json_str)
+
+
+def import_trip_json(json_str: str) -> str:
+    """從 JSON 導入旅程（兼容接口）"""
+    success = storage.import_from_json(json_str)
+    if success:
+        trip = storage.get_trip()
+        return trip.get("trip_id", "trip_default")
+    return None

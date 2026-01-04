@@ -111,7 +111,16 @@ def delete_trip(trip_id: str):
 # -----------------------
 # Days
 # -----------------------
-def add_day(trip_id: str, day_no: int, date_str: str = "") -> str:
+def add_day(trip_id: str, day_no: int = None, date_str: str = "") -> str:
+    """新增一天，如果 day_no 未指定，自動計算下一個編號"""
+    if day_no is None:
+        # 自動計算下一個 day_no
+        existing_days = storage.get_days()
+        if existing_days:
+            day_no = max([d.get("day_no", 0) for d in existing_days]) + 1
+        else:
+            day_no = 1
+    
     day_id = uid("day")
     storage.add_day({
         "day_id": day_id,

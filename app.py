@@ -2,7 +2,7 @@ import json
 import pandas as pd
 import streamlit as st
 
-from db import init_db
+from db import init_db, DB_PATH
 from modals import CATEGORIES, TASK_STATUS
 import services as svc
 
@@ -705,7 +705,7 @@ with tab_admin:
     
     # 資料庫位置
     st.markdown("### 資料庫資訊")
-    st.info(f"**資料庫路徑**: `{svc.db.DB_PATH}`")
+    st.info(f"**資料庫路徑**: `{DB_PATH}`")
     st.warning("重要提醒: Streamlit Cloud 使用臨時檔案系統，應用重啟後資料會清空。請定期匯出備份！")
     
     st.divider()

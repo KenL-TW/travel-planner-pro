@@ -13,7 +13,7 @@ import services as svc
 st.set_page_config(page_title="Travel Planner Pro", page_icon="✈️", layout="wide")
 init_db()
 
-st.markdown("## ✈️ Travel Planner Pro（Streamlit）")
+st.markdown("## Travel Planner Pro")
 st.caption("旅行規劃 × 團隊任務指派 × 篩選看板 × SQLite 落地（可部署、可備份、可匯出）")
 st.divider()
 
@@ -35,12 +35,12 @@ with st.sidebar:
 
     st.write("")
 
-    with st.expander("➕ 建立新旅程", expanded=False):
-        st.caption("💡 快速開始：只需填寫目的地，其他可稍後編輯")
+    with st.expander("建立新旅程", expanded=False):
+        st.caption("快速開始：只需填寫目的地，其他可稍後編輯")
         
         # 快速模板選擇
         quick_template = st.selectbox(
-            "🎯 快速模板（可選）",
+            "快速模板（可選）",
             options=["自訂", "日本旅遊", "歐洲旅遊", "東南亞", "國內旅遊"],
             index=0
         )
@@ -66,7 +66,7 @@ with st.sidebar:
             nt_dest = st.text_input("目的地 *", value=defaults["dest"], placeholder="例：東京、大阪")
         
         # 使用日期選擇器
-        with st.expander("📅 設定日期（可選，稍後可編輯）"):
+        with st.expander("設定日期（可選，稍後可編輯）"):
             from datetime import date, timedelta
             date_col1, date_col2 = st.columns(2)
             with date_col1:
@@ -75,7 +75,7 @@ with st.sidebar:
                 nt_end_date = st.date_input("結束日", value=None, format="YYYY-MM-DD")
         
         st.write("")
-        if st.button("✨ 立即建立", use_container_width=True, type="primary"):
+        if st.button("立即建立", use_container_width=True, type="primary"):
             if not nt_dest.strip():
                 st.error("請至少填寫目的地！")
             else:
@@ -86,24 +86,24 @@ with st.sidebar:
                     "endDate": str(nt_end_date) if nt_end_date else "",
                     "currency": nt_currency,
                 })
-                st.success("✅ 建立完成！")
+                st.success("建立完成！")
                 st.rerun()
 
     st.write("")
     st.markdown("---")
-    st.markdown("### 🔍 智慧篩選")
+    st.markdown("### 智慧篩選")
     st.caption("快速找到特定事件或任務")
 
     # Filters - will be applied in Task Board and Events list
-    f_keyword = st.text_input("🔎 關鍵字搜尋", value="", placeholder="搜尋標題、地點或任務內容")
-    f_category = st.multiselect("🏷️ 事件分類", options=CATEGORIES, default=[])
-    f_status = st.multiselect("📊 任務狀態", options=TASK_STATUS, default=[])
+    f_keyword = st.text_input("關鍵字搜尋", value="", placeholder="搜尋標題、地點或任務內容")
+    f_category = st.multiselect("事件分類", options=CATEGORIES, default=[])
+    f_status = st.multiselect("任務狀態", options=TASK_STATUS, default=[])
 
     st.write("")
     if any([f_keyword, f_category, f_status]):
-        st.info("🎯 已套用篩選條件")
+        st.info("已套用篩選條件")
     else:
-        st.caption("💡 提示：篩選器會同時影響『行程規劃』和『任務看板』頁籤")
+        st.caption("提示：篩選器會同時影響『行程規劃』和『任務看板』頁籤")
 
 
 # -----------------------
@@ -172,7 +172,7 @@ st.divider()
 # -----------------------
 # Tabs
 # -----------------------
-tab_plan, tab_tasks, tab_team, tab_check, tab_admin = st.tabs(["🗓️ 行程規劃", "📌 任務看板", "👥 旅遊團隊", "✅ 準備清單", "⚙️ 資料管理"])
+tab_plan, tab_tasks, tab_team, tab_check, tab_admin = st.tabs(["行程規劃", "任務看板", "旅遊團隊", "準備清單", "資料管理"])
 
 
 # -----------------------
@@ -190,9 +190,9 @@ with tab_plan:
         
         c1, c2 = st.columns([1.5, 1.5], gap="small")
         with c1:
-            new_title = st.text_input("🏷️ 旅程名稱", value=trip["trip_title"], key="trip_title_input")
+            new_title = st.text_input("旅程名稱", value=trip["trip_title"], key="trip_title_input")
         with c2:
-            new_dest = st.text_input("📍 目的地", value=trip["destination"], key="trip_dest_input")
+            new_dest = st.text_input("目的地", value=trip["destination"], key="trip_dest_input")
         
         c3, c4, c5 = st.columns([1.2, 1.2, 1.0], gap="small")
         with c3:
@@ -204,7 +204,7 @@ with tab_plan:
                     current_start = datetime.strptime(trip["start_date"], "%Y-%m-%d").date()
                 except:
                     pass
-            new_start_date = st.date_input("📅 開始日", value=current_start, format="YYYY-MM-DD", key="trip_start_input")
+            new_start_date = st.date_input("開始日", value=current_start, format="YYYY-MM-DD", key="trip_start_input")
         
         with c4:
             # 結束日期選擇器（最小日期為開始日）
@@ -215,13 +215,13 @@ with tab_plan:
                 except:
                     pass
             min_end_date = new_start_date if new_start_date else None
-            new_end_date = st.date_input("📅 結束日", value=current_end, min_value=min_end_date, format="YYYY-MM-DD", key="trip_end_input")
+            new_end_date = st.date_input("結束日", value=current_end, min_value=min_end_date, format="YYYY-MM-DD", key="trip_end_input")
         
         with c5:
             # 幣別下拉選單
             currency_options = ["TWD", "JPY", "USD", "EUR", "KRW", "CNY", "THB", "SGD", "GBP", "AUD"]
             current_curr_idx = currency_options.index(trip["currency"]) if trip["currency"] in currency_options else 0
-            new_curr = st.selectbox("💱 幣別", options=currency_options, index=current_curr_idx, key="trip_curr_input")
+            new_curr = st.selectbox("幣別", options=currency_options, index=current_curr_idx, key="trip_curr_input")
         
         # 檢測是否有變更
         has_changes = (
@@ -235,7 +235,7 @@ with tab_plan:
         # 即時保存按鈕
         col_save, col_info = st.columns([1, 3])
         with col_save:
-            if st.button("💾 保存", use_container_width=True, type="primary" if has_changes else "secondary", disabled=not has_changes):
+            if st.button("保存", use_container_width=True, type="primary" if has_changes else "secondary", disabled=not has_changes):
                 svc.update_trip(trip_id, {
                     "trip_title": new_title,
                     "destination": new_dest,
@@ -243,18 +243,18 @@ with tab_plan:
                     "end_date": str(new_end_date) if new_end_date else "",
                     "currency": new_curr
                 })
-                st.success("✅ 已保存")
+                st.success("已保存")
                 st.rerun()
         with col_info:
             if has_changes:
-                st.info("💡 有未保存的變更")
+                st.info("有未保存的變更")
             else:
-                st.caption("✓ 資料已同步")
+                st.caption("資料已同步")
 
         st.write("")
         st.subheader("行程時間線")
 
-        if st.button("➕ 新增旅程天數", use_container_width=True):
+        if st.button("新增旅程天數", use_container_width=True):
             svc.add_day(trip_id)
             st.rerun()
 
@@ -300,14 +300,14 @@ with tab_plan:
             
             # 簡化快速新增事件區塊
             with st.container():
-                st.markdown("**⚡ 快速新增事件**")
+                st.markdown("**快速新增事件**")
                 quick_cols = st.columns(5)
                 event_templates = [
-                    ("✈️ 交通", "交通", "09:00"),
-                    ("🏨 住宿", "住宿", "15:00"),
-                    ("🍽️ 餐飲", "餐飲", "12:00"),
-                    ("🎫 景點", "門票", "10:00"),
-                    ("➕ 新增", "其他", "12:00")
+                    ("交通", "交通", "09:00"),
+                    ("住宿", "住宿", "15:00"),
+                    ("餐飲", "餐飲", "12:00"),
+                    ("景點", "門票", "10:00"),
+                    ("新增", "其他", "12:00")
                 ]
                 
                 for i, (label, category, time) in enumerate(event_templates):
@@ -325,37 +325,36 @@ with tab_plan:
 
             for e in events:
                 ev_title = e.get("title") or "（未命名事件）"
-                ev_icon = {"交通": "✈️", "住宿": "🏨", "餐飲": "🍽️", "門票": "🎫", "購物": "🛍️", "其他": "📍"}.get(e.get('category','其他'), "📍")
                 ev_cost = f" · {trip['currency']} {float(e.get('cost') or 0):,.0f}" if float(e.get('cost') or 0) > 0 else ""
-                ev_sub = f"{e.get('time','')} {ev_icon} {e.get('category','其他')}{ev_cost}"
+                ev_sub = f"{e.get('time','')} · {e.get('category','其他')}{ev_cost}"
                 ev_loc = f" @ {e.get('location','')}" if e.get('location','') else ""
                 
                 with st.expander(f"**{ev_title}**{ev_loc}  —  {ev_sub}"):
                     # 快速編輯區
-                    st.markdown("##### 📝 基本資訊")
+                    st.markdown("##### 基本資訊")
                     ec1, ec2, ec3 = st.columns([1.0, 1.0, 1.0], gap="small")
                     with ec1:
-                        etime = st.text_input("⏰ 時間", value=e.get("time","12:00"), key=f"etime_{e['event_id']}", placeholder="09:00")
+                        etime = st.text_input("時間", value=e.get("time","12:00"), key=f"etime_{e['event_id']}", placeholder="09:00")
                     with ec2:
-                        ecat = st.selectbox("🏷️ 分類", options=CATEGORIES, index=CATEGORIES.index(e.get("category","其他")) if e.get("category","其他") in CATEGORIES else CATEGORIES.index("其他"), key=f"ecat_{e['event_id']}")
+                        ecat = st.selectbox("分類", options=CATEGORIES, index=CATEGORIES.index(e.get("category","其他")) if e.get("category","其他") in CATEGORIES else CATEGORIES.index("其他"), key=f"ecat_{e['event_id']}")
                     with ec3:
-                        ecost = st.number_input(f"💰 成本 ({trip['currency']})", value=float(e.get("cost") or 0), min_value=0.0, step=100.0, key=f"ecost_{e['event_id']}")
+                        ecost = st.number_input(f"成本 ({trip['currency']})", value=float(e.get("cost") or 0), min_value=0.0, step=100.0, key=f"ecost_{e['event_id']}")
 
                     
-                    etitle = st.text_input("📌 標題", value=e.get("title",""), key=f"etitle_{e['event_id']}", placeholder="例：午餐、飯店入住、參觀博物館")
-                    eloc = st.text_input("📍 地點", value=e.get("location",""), key=f"eloc_{e['event_id']}", placeholder="例：淺草寺、東京車站")
+                    etitle = st.text_input("標題", value=e.get("title",""), key=f"etitle_{e['event_id']}", placeholder="例如：午餐、飯店入住、參觀博物館")
+                    eloc = st.text_input("地點", value=e.get("location",""), key=f"eloc_{e['event_id']}", placeholder="例如：淺草寺、東京車站")
                     
                     # 進階選項放在 expander 中
-                    with st.expander("🔧 進階選項（筆記、標籤）"):
-                        enotes = st.text_area("📋 筆記", value=e.get("notes",""), height=90, key=f"enotes_{e['event_id']}", 
+                    with st.expander("進階選項（筆記、標籤）"):
+                        enotes = st.text_area("筆記", value=e.get("notes",""), height=90, key=f"enotes_{e['event_id']}", 
                                             placeholder="記錄注意事項、營業時間、預訂確認碼等...")
-                        etags = st.text_input("🏷️ 標籤", value=e.get("tags",""), key=f"etags_{e['event_id']}", 
+                        etags = st.text_input("標籤", value=e.get("tags",""), key=f"etags_{e['event_id']}", 
                                             placeholder="逗號分隔，例：必訪,美食,拍照景點")
 
                     st.write("")
                     save_col1, save_col2 = st.columns([3, 1])
                     with save_col1:
-                        if st.button("💾 保存事件", key=f"save_ev_{e['event_id']}", use_container_width=True, type="primary"):
+                        if st.button("保存事件", key=f"save_ev_{e['event_id']}", use_container_width=True, type="primary"):
                             svc.update_event(e["event_id"], {
                                 "time": etime,
                                 "category": ecat,
@@ -365,7 +364,7 @@ with tab_plan:
                                 "notes": enotes,
                                 "tags": etags,
                             })
-                            st.success("✅ 事件已保存！")
+                            st.success("事件已保存！")
                             st.rerun()
                     with save_col2:
                         if st.button("🗑️ 刪除", key=f"del_ev_{e['event_id']}", use_container_width=True):
@@ -374,8 +373,8 @@ with tab_plan:
 
                     st.write("")
                     st.markdown("---")
-                    st.markdown("##### ✅ 待辦任務")
-                    st.caption("💡 為這個事件新增待辦任務，例如：訂位、買票、確認時間等")
+                    st.markdown("##### 待辦任務")
+                    st.caption("為這個事件新增待辦任務，例如：訂位、買票、確認時間等")
 
                     # Task filters apply here too
                     def task_match(t):
@@ -409,7 +408,7 @@ with tab_plan:
                                     st.rerun()
 
                             # 自動保存按鈕（當內容或指派改變時）
-                            if st.button("💾 保存", key=f"tsave_{t['task_id']}", use_container_width=True):
+                            if st.button("保存", key=f"tsave_{t['task_id']}", use_container_width=True):
                                 # 根據任務狀態自動判斷：如果有指派人則為 doing，否則為 todo
                                 task_status = "doing" if member_choice_to_id.get(assignee_label) else "todo"
                                 svc.update_task(t["task_id"], {
@@ -423,7 +422,7 @@ with tab_plan:
 
                     st.write("")
                     with st.container():
-                        st.markdown("**➕ 新增任務**")
+                        st.markdown("**新增任務**")
                         addt1, addt2, addt3 = st.columns([2.4, 1.4, 0.6], gap="small")
                         with addt1:
                             new_task_text = st.text_input("任務內容", value="", key=f"newtk_{e['event_id']}", 
@@ -446,7 +445,7 @@ with tab_plan:
         st.subheader("匯出/備份")
         export_payload = svc.export_trip_json(trip_id)
         st.download_button(
-            "📤 匯出此旅程 JSON",
+            "匯出此旅程 JSON",
             data=json.dumps(export_payload, ensure_ascii=False, indent=2).encode("utf-8"),
             file_name=f"{trip['trip_title']}_export.json",
             mime="application/json",
@@ -454,9 +453,9 @@ with tab_plan:
         )
 
         st.write("")
-        st.subheader("🗑️ 刪除旅程")
+        st.subheader("刪除旅程")
         if len(trips) > 1:
-            with st.expander("⚠️ 危險操作", expanded=False):
+            with st.expander("危險操作", expanded=False):
                 st.warning("刪除旅程將永久刪除所有相關資料（行程、任務、清單等），此操作無法復原！")
                 st.caption(f"當前旅程：{trip['trip_title']} ({trip['destination']})")
                 confirm_text = st.text_input("請輸入 DELETE 確認刪除", key="delete_confirm")
@@ -683,7 +682,7 @@ with tab_admin:
     st.subheader("⚙️ 資料庫管理")
     
     # 資料庫統計
-    st.markdown("### 📊 資料庫統計")
+    st.markdown("### 資料庫統計")
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
@@ -705,20 +704,20 @@ with tab_admin:
     st.divider()
     
     # 資料庫位置
-    st.markdown("### 📁 資料庫資訊")
+    st.markdown("### 資料庫資訊")
     st.info(f"**資料庫路徑**: `{svc.db.DB_PATH}`")
-    st.warning("⚠️ **重要提醒**: Streamlit Cloud 使用臨時檔案系統，應用重啟後資料會清空。請定期匯出備份！")
+    st.warning("重要提醒: Streamlit Cloud 使用臨時檔案系統，應用重啟後資料會清空。請定期匯出備份！")
     
     st.divider()
     
     # 匯出功能
-    st.markdown("### 💾 資料匯出與備份")
+    st.markdown("### 資料匯出與備份")
     
     export_col1, export_col2 = st.columns(2)
     
     with export_col1:
         st.markdown("#### 匯出所有旅程資料")
-        if st.button("📤 匯出所有旅程（JSON）", use_container_width=True):
+        if st.button("匯出所有旅程（JSON）", use_container_width=True):
             all_trips_data = []
             for t in trips:
                 trip_data = svc.export_trip_json(t["trip_id"])
@@ -741,7 +740,7 @@ with tab_admin:
                 with open(svc.db.DB_PATH, "rb") as f:
                     db_bytes = f.read()
                 st.download_button(
-                    "⬇️ 下載 SQLite 資料庫",
+                    "下載 SQLite 資料庫",
                     data=db_bytes,
                     file_name=f"travel_planner_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.db",
                     mime="application/x-sqlite3",
@@ -755,11 +754,11 @@ with tab_admin:
     st.divider()
     
     # 查看所有資料
-    st.markdown("### 🔍 查看所有資料")
+    st.markdown("### 查看所有資料")
     
     if trips:
         for t in trips:
-            with st.expander(f"📋 {t['trip_title']} ({t['destination']})"):
+            with st.expander(f"{t['trip_title']} ({t['destination']})"):
                 trip_detail = svc.get_trip(t["trip_id"])
                 
                 # 基本資訊
@@ -793,8 +792,8 @@ with tab_admin:
     st.divider()
     
     # 危險操作區
-    st.markdown("### ⚠️ 危險操作")
-    with st.expander("🗑️ 刪除所有資料（無法復原）", expanded=False):
+    st.markdown("### 危險操作")
+    with st.expander("刪除所有資料（無法復原）", expanded=False):
         st.error("**警告**: 此操作將刪除所有旅程、事件、任務和清單資料，無法復原！")
         confirm_delete_all = st.text_input("請輸入 DELETE ALL 以確認", key="confirm_delete_all")
         if st.button("確認刪除所有資料", type="secondary"):
@@ -802,7 +801,7 @@ with tab_admin:
                 try:
                     for t in trips:
                         svc.delete_trip(t["trip_id"])
-                    st.success("✅ 所有資料已刪除")
+                    st.success("所有資料已刪除")
                     st.rerun()
                 except Exception as e:
                     st.error(f"刪除失敗: {e}")

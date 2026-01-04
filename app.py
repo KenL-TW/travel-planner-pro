@@ -2,16 +2,18 @@ import json
 import pandas as pd
 import streamlit as st
 
-from db import init_db, DB_PATH
 from modals import CATEGORIES, TASK_STATUS
-import services as svc
+import services_json as svc
+import json_storage
 
 
 # -----------------------
 # Streamlit Config
 # -----------------------
 st.set_page_config(page_title="Travel Planner Pro", page_icon="✈️", layout="wide")
-init_db()
+
+# 初始化 JSON 數據
+_ = json_storage.load_data()
 
 st.markdown("## Travel Planner Pro")
 st.caption("旅行規劃 × 團隊任務指派 × 篩選看板 × SQLite 落地（可部署、可備份、可匯出）")
@@ -652,9 +654,9 @@ with tab_admin:
     st.divider()
     
     # 資料庫位置
-    st.markdown("### 資料庫資訊")
-    st.info(f"**資料庫路徑**: `{DB_PATH}`")
-    st.warning("重要提醒: Streamlit Cloud 使用臨時檔案系統，應用重啟後資料會清空。請定期匯出備份！")
+    st.markdown("### 資料儲存資訊")
+    st.info(f"**資料檔案路徑**: `{json_storage.DATA_FILE}`")
+    st.success("✅ 使用 JSON 文件儲存，數據持久化且易於備份！")
     
     st.divider()
     

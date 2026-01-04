@@ -368,13 +368,24 @@ with tab_plan:
                                     svc.delete_task(t["task_id"])
                                     st.rerun()
 
-                            # 自動保存按鈕
+                            # 截止日期
+                            from datetime import datetime
+                            task_due_date = None
+                            if t.get("due_date"):
+                                try:
+                                    task_due_date = datetime.strptime(t["due_date"], "%Y-%m-%d").date()
+                                except:
+                                    pass
+                            due_date_input = st.date_input("📅 截止日期", value=task_due_date, key=f"tdue_{t['task_id']}", format="YYYY-MM-DD")
+                            
+                            # 保存按鈕
                             if st.button("保存", key=f"tsave_{t['task_id']}", use_container_width=True):
                                 svc.update_task(t["task_id"], {
                                     "text": ttext,
                                     "status": task_status_select,
                                     "assignee_id": member_choice_to_id.get(assignee_label),
-                                    "completed": task_status_select == "done"
+                                    "completed": task_status_select == "done",
+                                    "due_date": str(due_date_input) if due_date_input else ""
                                 })
                                 st.rerun()
                     else:
@@ -490,13 +501,23 @@ with tab_tasks:
             df = df[df["assignee"].isin(assignee_filter)]
 
         # show summary
-        s1, s2, s3 = st.columns([1.0, 1.0, 2.0], gap="large")
+        s1, s2, s3, s4 = st.columns([1.0, 1.0, 1.0, 1.5], gap="medium")
+        
+        todo_count = len(df[df['status'] == 'todo'])
+        doing_count = len(df[df['status'] == 'doing'])
+        done_count = len(df[df['status'] == 'done'])
+        
         with s1:
-            st.metric("任務數", len(df))
+            st.metric("📋 待辦", todo_count)
         with s2:
-            st.metric("完成率", f"{round((df['status'].eq('done').sum()/len(df))*100)}%" if len(df) else "0%")
+            st.metric("⚙️ 進行中", doing_count)
         with s3:
-            st.caption("小技巧：點任務所在事件去編輯指派/狀態；這裡是『監控台』。")
+            st.metric("✅ 完成", done_count)
+        with s4:
+            completion_rate = round((done_count/len(df))*100) if len(df) else 0
+            st.metric("完成率", f"{completion_rate}%")
+        
+        st.caption("💡 提示：點擊任務所在的事件展開區塊，可編輯任務內容、狀態、指派人和截止日期")
 
         st.dataframe(
             df.sort_values(["status", "day_no", "due_date"], ascending=[True, True, True]),

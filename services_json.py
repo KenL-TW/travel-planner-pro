@@ -336,6 +336,8 @@ def update_task(task_id: str, data: dict):
         updates["status"] = data["status"]
     if "completed" in data:
         updates["completed"] = data["completed"]
+    if "due_date" in data:
+        updates["due_date"] = data["due_date"]
     
     storage.update_task(task_id, updates)
 

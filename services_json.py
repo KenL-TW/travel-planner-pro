@@ -222,6 +222,19 @@ def delete_event(event_id: str):
 # -----------------------
 # Members
 # -----------------------
+def create_member(name: str, role: str = "", contact: str = "") -> str:
+    """創建新成員（簡化接口）"""
+    member_id = uid("mem")
+    storage.add_member({
+        "member_id": member_id,
+        "name": name,
+        "role": role,
+        "contact": contact,
+        "created_at": now_iso()
+    })
+    return member_id
+
+
 def add_member(trip_id: str, data: dict) -> str:
     member_id = uid("mem")
     storage.add_member({

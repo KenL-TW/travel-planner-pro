@@ -30,20 +30,19 @@ with st.sidebar:
         st.success("已自動建立第一個旅程。")
         st.session_state.selected_trip_id = tid
 
-    trip_options = {f"{t['trip_title']}  ({t['destination']})": t["trip_id"] for t in trips}
+    # 建立選項列表（保持順序）
+    trip_labels = [f"{t['trip_title']}  ({t['destination']})" for t in trips]
+    trip_ids = [t["trip_id"] for t in trips]
     
-    # 如果 session_state 中有指定的 trip_id，找到對應的 label
+    # 決定預設選中的索引
     default_index = 0
-    if "selected_trip_id" in st.session_state:
-        for idx, (label, tid) in enumerate(trip_options.items()):
-            if tid == st.session_state.selected_trip_id:
-                default_index = idx
-                break
+    if "selected_trip_id" in st.session_state and st.session_state.selected_trip_id in trip_ids:
+        default_index = trip_ids.index(st.session_state.selected_trip_id)
     
-    selected_label = st.selectbox("選擇旅程", options=list(trip_options.keys()), index=default_index)
-    trip_id = trip_options[selected_label]
+    selected_label = st.selectbox("選擇旅程", options=trip_labels, index=default_index, key="trip_selector")
+    trip_id = trip_ids[trip_labels.index(selected_label)]
     
-    # 更新 session_state
+    # 同步更新 session_state
     st.session_state.selected_trip_id = trip_id
 
     st.write("")

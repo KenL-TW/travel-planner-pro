@@ -72,9 +72,23 @@ def get_trip(trip_id: str) -> dict:
     # 為每一天加載事件和任務
     for day in days_list:
         day["events"] = storage.get_events_by_day(day["day_id"])
-        # 為每個事件加載任務
+        # 為每個事件加載任務，並映射欄位名
         for event in day["events"]:
+            # 映射欄位名以兼容 app.py
+            event["title"] = event.get("event_title", "")
+            event["time"] = event.get("time_slot", "")
+            event["notes"] = event.get("note", "")
             event["tasks"] = [t for t in storage.get_tasks() if t.get("event_id") == event["event_id"]]
+            # 為每個任務映射欄位
+            for task in event["tasks"]:
+                task["text"] = task.get("content", "")
+                task["assignee_name"] = ""
+                if task.get("assignee_id"):
+                    members = storage.get_members()
+                    for m in members:
+                        if m["member_id"] == task["assignee_id"]:
+                            task["assignee_name"] = m["name"]
+                            break
     
     return {
         "trip": trip,
@@ -187,6 +201,10 @@ def update_event(event_id: str, data: dict):
         updates["cost"] = float(data["cost"])
     if "note" in data:
         updates["note"] = data["note"]
+    if "notes" in data:
+        updates["note"] = data["notes"]
+    if "tags" in data:
+        updates["tags"] = data.get("tags", "")
     
     storage.update_event(event_id, updates)
 

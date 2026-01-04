@@ -148,7 +148,11 @@ def delete_day(day_id: str):
 # -----------------------
 # Events
 # -----------------------
-def add_event(day_id: str, data: dict) -> str:
+def add_event(day_id: str, data: dict = None) -> str:
+    """新增事件，如果 data 為 None 則創建空事件"""
+    if data is None:
+        data = {}
+    
     event_id = uid("evt")
     storage.add_event({
         "event_id": event_id,
@@ -166,12 +170,17 @@ def add_event(day_id: str, data: dict) -> str:
 
 def update_event(event_id: str, data: dict):
     updates = {}
+    # 支持 camelCase 和普通格式
     if "eventTitle" in data:
         updates["event_title"] = data["eventTitle"]
+    if "title" in data:
+        updates["event_title"] = data["title"]
     if "category" in data:
         updates["category"] = data["category"]
     if "timeSlot" in data:
         updates["time_slot"] = data["timeSlot"]
+    if "time" in data:
+        updates["time_slot"] = data["time"]
     if "location" in data:
         updates["location"] = data["location"]
     if "cost" in data:

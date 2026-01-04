@@ -263,7 +263,7 @@ with tab_plan:
                 for i, (label, category, time) in enumerate(event_templates):
                     with quick_cols[i]:
                         if st.button(label, key=f"quick_add_{d['day_id']}_{category}_{i}", use_container_width=True):
-                            event_id = svc.add_event(trip_id, d["day_id"])
+                            event_id = svc.add_event(d["day_id"])
                             svc.update_event(event_id, {"category": category, "time": time, "title": f"{category}活動" if category != "其他" else "新事件"})
                             st.rerun()
 

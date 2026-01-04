@@ -228,6 +228,9 @@ with tab_plan:
                 except:
                     pass
             min_end_date = new_start_date if new_start_date else None
+            # 確保 value 不小於 min_value，避免 Streamlit 報錯
+            if current_end and min_end_date and current_end < min_end_date:
+                current_end = min_end_date
             new_end_date = st.date_input("結束日", value=current_end, min_value=min_end_date, format="YYYY-MM-DD", key="trip_end_input")
         
         with c5:
